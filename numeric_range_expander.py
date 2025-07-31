@@ -23,6 +23,9 @@ class NumericRangeExpander:
         numbers = []
         ranges = input.split(',')
         for range in ranges:
+            range = range.strip()
+            if not range:
+                continue
             if '-' in range:
                 start, end = map(int, range.split('-'))
                 numbers.extend(range(start, end + 1))
