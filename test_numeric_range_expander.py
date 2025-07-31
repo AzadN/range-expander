@@ -21,6 +21,7 @@ def test_stage1_basic():
 def test_stage2_whitespaces():
     """
     Test the expand method of NumericRangeExpander with input cases containing whitespaces.
+    Ensures that whitespace around numbers and ranges is handled correctly.
     """
     s = NumericRangeExpander()
     assert s.expand(" , 1-8 , ,9 ") == [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -29,3 +30,15 @@ def test_stage2_whitespaces():
     assert s.expand(" 20-22 ,  24 ,  26 - 27 ") == [20, 21, 22, 24, 26, 27]
     assert s.expand("  30 - 30 ,  31 ") == [30, 31]
     assert s.expand("  40-41 , ,  42  ") == [40, 41, 42]
+
+def test_stage3_custom_delimiters():
+    """
+    Test the expand method of NumericRangeExpander with custom range delimiters.
+    Ensures that multiple delimiters are supported and whitespace is handled.
+    """
+    s = NumericRangeExpander(delimiters=['..', '~', 'to'])
+    assert s.expand("1..3,4~5,6 to 7,8") == [1, 2, 3, 4, 5, 6, 7, 8]
+    assert s.expand("10..12, 13~14, 15 to 16") == [10, 11, 12, 13, 14, 15, 16]
+    assert s.expand("20..20,21~21,22 to 22") == [20, 21, 22]
+    assert s.expand(" 30..32 , 33 ~ 34 , 35 to 36 ") == [30, 31, 32, 33, 34, 35, 36]
+    assert s.expand("40..41, , 42~43, 44 to 45") == [40, 41, 42, 43, 44, 45]
