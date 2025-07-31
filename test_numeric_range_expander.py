@@ -42,3 +42,26 @@ def test_stage3_custom_delimiters():
     assert s.expand("20..20,21~21,22 to 22") == [20, 21, 22]
     assert s.expand(" 30..32 , 33 ~ 34 , 35 to 36 ") == [30, 31, 32, 33, 34, 35, 36]
     assert s.expand("40..41, , 42~43, 44 to 45") == [40, 41, 42, 43, 44, 45]
+    try:
+        expander = NumericRangeExpander(delimiters=["~"])
+        expander.expand("1-3,5")
+    except ValueError as e:
+        assert "Invalid number or unsupported range" in str(e)
+
+def test_stage4_reversed_ranges():
+    """
+    Test the expand method of NumericRangeExpander with reversed ranges.
+    Ensures that ranges specified in reverse order are handled correctly.
+    """
+    s = NumericRangeExpander()
+    assert s.expand("5-3,3-3") == [5, 4, 3, 3]
+    assert s.expand("10-8,7") == [10, 9, 8, 7]
+    assert s.expand("20~18,17") == [20, 19, 18, 17]
+    assert s.expand("30..28,27,26-24") == [30, 29, 28, 27, 26, 25, 24]
+    assert s.expand("50 to 48,47,46~44") == [50, 49, 48, 47, 46, 45, 44]
+    assert s.expand("40-41, , 42~43, 44 to 45") == [40, 41, 42, 43, 44, 45]
+    # Test for invalid range type (should raise ValueError for non-integer start/end)
+    try:
+        s.expand("1-a")
+    except ValueError as e:
+        assert "Invalid range" in str(e)

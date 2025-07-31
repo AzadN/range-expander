@@ -23,9 +23,12 @@ class NumericRangeExpander:
         for delimiter in self.range_delimiters:
             if delimiter in token:
                 parts = token.split(delimiter)
-                if len(parts) == 2:
-                    return int(parts[0].strip()), int(parts[1].strip())
-        return None # No delimiter match
+                if len(parts) == 2:  # Expect exactly two parts for a valid range
+                    try:
+                        return int(parts[0].strip()), int(parts[1].strip())
+                    except ValueError:  # Handle non-integer values
+                        raise ValueError(f"Invalid range: '{token}'")
+        return None  # No delimiter match
     
     def expand(self, input):
         """
@@ -46,10 +49,12 @@ class NumericRangeExpander:
             parsed = self.process_range(token)
             if parsed:
                 start, end = parsed
-                numbers.extend(range(start, end + 1))
+                if not isinstance(start, int) or not isinstance(end, int):
+                    raise ValueError(f"Invalid range: {token}")
+                jump = 1 if start <= end else -1  # Determine the step direction
+                numbers.extend(range(start, end + jump, jump))
             else:
                 if not token.isdigit():
                     raise ValueError(f"Invalid number or unsupported range: '{token}'")
-                else:
-                    numbers.append(int(token))
+                numbers.append(int(token))
         return numbers
