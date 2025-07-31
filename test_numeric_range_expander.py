@@ -65,3 +65,27 @@ def test_stage4_reversed_ranges():
         s.expand("1-a")
     except ValueError as e:
         assert "Invalid range" in str(e)
+
+def test_stage5_jump_values():
+    """
+    Test the expand method of NumericRangeExpander with jump values.
+    Ensures that jump values are correctly applied to ranges.
+    """
+    s = NumericRangeExpander()
+    assert s.expand("1-5:2,6-10:3") == [1, 3, 5, 6, 9]
+    assert s.expand("10-20:5") == [10, 15, 20]
+    assert s.expand("10-2:3") == [10, 7, 4]
+    assert s.expand("8-2:2") == [8, 6, 4, 2]
+    assert s.expand("5-5:1") == [5]
+    assert s.expand("1-3:1,4,5-7:2") == [1, 2, 3, 4, 5, 7]
+    assert s.expand(" 2 - 8 : 3 , 10 ") == [2, 5, 8, 10]
+    # Invalid jump (non-integer)
+    try:
+        s.expand("1-5:a")
+    except ValueError as e:
+        assert "Invalid jump value" in str(e) or "invalid literal for int()" in str(e)
+    # Invalid jump (zero)
+    try:
+        s.expand("1-5:0")
+    except ValueError as e:
+        assert "Jump value must not be zero" in str(e)

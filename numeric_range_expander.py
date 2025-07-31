@@ -46,13 +46,25 @@ class NumericRangeExpander:
             token = token.strip()
             if not token:
                 continue # Skip empty tokens
+
+            jump = 1
+            # Check for jump value
+            if ':' in token:
+                token, jump_part = token.split(':', 1)
+                try:
+                    jump = int(jump_part.strip())
+                except ValueError:
+                    raise ValueError(f"Invalid jump value: {jump_part.strip()}")
+                if jump == 0:
+                    raise ValueError("Jump value must not be zero")
             parsed = self.process_range(token)
             if parsed:
                 start, end = parsed
-                if not isinstance(start, int) or not isinstance(end, int):
-                    raise ValueError(f"Invalid range: {token}")
-                jump = 1 if start <= end else -1  # Determine the step direction
-                numbers.extend(range(start, end + jump, jump))
+                jump = abs(jump)
+                if start > end:
+                    numbers.extend(range(start, end - 1, -jump))
+                else:
+                    numbers.extend(range(start, end + 1, jump))
             else:
                 if not token.isdigit():
                     raise ValueError(f"Invalid number or unsupported range: '{token}'")

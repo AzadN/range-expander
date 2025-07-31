@@ -9,6 +9,7 @@ The `NumericRangeExpander` class takes a string containing numbers and numeric r
 ## Features
 - Supports comma-separated numbers and ranges (e.g., `"1-3,5"`)
 - Supports custom range delimiters (e.g., `..`, `to`, `~`)
+- Supports jump values for ranges (e.g., `1-5:2` → `[1, 3, 5]`)
 - Easy to use and extend
 
 
@@ -24,6 +25,7 @@ print(result)
 # Output: [1, 2, 3, 5, 7, 8, 9]
 ```
 
+
 ### Using custom delimiters
 You can specify your own range delimiters (e.g., `..`, `to`, `~`):
 ```python
@@ -31,9 +33,23 @@ from numeric_range_expander import NumericRangeExpander
 
 expander = NumericRangeExpander(delimiters=["..", "~", "to"])
 result = expander.expand("1..3,4~5,6 to 7,8")
-print(result)  
-# Output: [1, 2, 3, 4, 5, 6, 7, 8]
+print(result)  # Output: [1, 2, 3, 4, 5, 6, 7, 8]
 ```
+
+### Using jump values in ranges
+You can specify a jump value after a colon to control the step size in a range:
+```python
+from numeric_range_expander import NumericRangeExpander
+
+expander = NumericRangeExpander()
+result = expander.expand("1-5:2,10-2:4")
+print(result)  # Output: [1, 3, 5, 10, 6, 2]
+```
+
+Notes:
+- The jump value must be a nonzero integer. If omitted, the default is 1.
+- Reversed ranges (e.g., `10-2:4`) are supported.
+- Invalid jump values (e.g., `1-5:a` or `1-5:0`) will raise a `ValueError`.
 
 
 ## Installation
