@@ -10,6 +10,7 @@ The `NumericRangeExpander` class takes a string containing numbers and numeric r
 - Supports comma-separated numbers and ranges (e.g., `"1-3,5"`)
 - Supports custom range delimiters (e.g., `..`, `to`, `~`)
 - Supports jump values for ranges (e.g., `1-5:2` → `[1, 3, 5]`)
+- Removes duplicate values from the output (e.g., `1-3,2,3` → `[1, 2, 3]`)
 - Easy to use and extend
 
 
@@ -46,9 +47,18 @@ result = expander.expand("1-5:2,10-2:4")
 print(result)  # Output: [1, 3, 5, 10, 6, 2]
 ```
 
+### Duplicate handling
+Duplicate values are automatically removed from the output:
+```python
+expander = NumericRangeExpander()
+result = expander.expand("1-3,2,3")
+print(result)  # Output: [1, 2, 3]
+```
+
 Notes:
 - The jump value must be a nonzero integer. If omitted, the default is 1.
 - Reversed ranges (e.g., `10-2:4`) are supported.
+- Duplicate values from overlapping ranges or repeated numbers are removed.
 - Invalid jump values (e.g., `1-5:a` or `1-5:0`) will raise a `ValueError`.
 
 

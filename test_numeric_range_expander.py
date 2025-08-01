@@ -46,7 +46,7 @@ def test_stage3_custom_delimiters():
         expander = NumericRangeExpander(delimiters=["~"])
         expander.expand("1-3,5")
     except ValueError as e:
-        assert "Invalid number or unsupported range" in str(e)
+        assert "Invalid standalone value:" in str(e)
 
 def test_stage4_reversed_ranges():
     """
@@ -54,7 +54,7 @@ def test_stage4_reversed_ranges():
     Ensures that ranges specified in reverse order are handled correctly.
     """
     s = NumericRangeExpander()
-    assert s.expand("5-3,3-3") == [5, 4, 3, 3]
+    assert s.expand("5-3,3-3") == [5, 4, 3]
     assert s.expand("10-8,7") == [10, 9, 8, 7]
     assert s.expand("20~18,17") == [20, 19, 18, 17]
     assert s.expand("30..28,27,26-24") == [30, 29, 28, 27, 26, 25, 24]
@@ -88,4 +88,27 @@ def test_stage5_jump_values():
     try:
         s.expand("1-5:0")
     except ValueError as e:
-        assert "Jump value must not be zero" in str(e)
+        assert "Invalid jump value:" in str(e)
+
+def test_stage6_dedup_overlap():
+    """
+    Test the expand method of NumericRangeExpander for duplicate handling.
+    Ensures that duplicate values are not repeated in the output.
+    """
+    s = NumericRangeExpander()
+    assert s.expand("1-5,3-7") == [1, 2, 3, 4, 5, 6, 7]
+    assert s.expand("2,2,2") == [2]
+    assert s.expand("1-5:2,3-7:2") == [1, 3, 5, 7]
+    assert s.expand("1-3,2,3") == [1, 2, 3]
+    s2 = NumericRangeExpander(delimiters=["..", "~", "to"])
+    assert s2.expand("1..3,2~4,3 to 5") == [1, 2, 3, 4, 5]
+    # Invalid jump syntax (multiple colons)
+    try:
+        s.expand("1-5:2:3")
+    except ValueError as e:
+        assert "Invalid jump syntax" in str(e)
+    # Invalid standalone value
+    try:
+        s.expand("1-3,a")
+    except ValueError as e:
+        assert "Invalid standalone value" in str(e)

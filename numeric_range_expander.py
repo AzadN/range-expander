@@ -1,7 +1,9 @@
 class NumericRangeExpander:
     """
-    Expands numeric string ranges into a list of integers.
+    Expands numeric string ranges into a list of unique integers.
     For example, '1-3,5' becomes [1, 2, 3, 5].
+    Duplicate values are removed from the output.
+    Supports custom delimiters and jump values.
     """
 
     def __init__(self, delimiters=None):
@@ -25,48 +27,67 @@ class NumericRangeExpander:
                 parts = token.split(delimiter)
                 if len(parts) == 2:  # Expect exactly two parts for a valid range
                     try:
+                        # Try converting both parts to integers
                         return int(parts[0].strip()), int(parts[1].strip())
-                    except ValueError:  # Handle non-integer values
+                    except ValueError:
+                        # Raise a clear error if either part is not an integer
                         raise ValueError(f"Invalid range: '{token}'")
-        return None  # No delimiter match
+        # Return None if no delimiter matches
+        return None
     
     def expand(self, input):
         """
-        Expands a string containing numbers and ranges into a list of integers.
+        Expands a string containing numbers and ranges into a list of unique integers.
+        Supports custom delimiters and jump values.
+        Duplicate values are removed from the output.
 
         Args:
             input (str): A string containing numbers and ranges separated by commas (e.g., '1-3,5').
 
         Returns:
-            numbers (list): A list of integers expanded from the input string.
+            numbers (list): A list of unique integers expanded from the input string.
         """
         numbers = []
+        seen = set()
         ranges = input.split(',')
         for token in ranges:
             token = token.strip()
             if not token:
-                continue # Skip empty tokens
+                continue  # Skip empty tokens
 
             jump = 1
-            # Check for jump value
+            # Check for jump value syntax
             if ':' in token:
-                token, jump_part = token.split(':', 1)
+                parts = token.split(':')
+                if len(parts) != 2:
+                    # Invalid jump syntax (e.g., multiple colons)
+                    raise ValueError(f"Invalid jump syntax in token: '{token}'")
+                token, jump_part = parts
                 try:
                     jump = int(jump_part.strip())
+                    if jump <= 0:
+                        raise ValueError("Jump must be a positive integer.")
                 except ValueError:
-                    raise ValueError(f"Invalid jump value: {jump_part.strip()}")
-                if jump == 0:
-                    raise ValueError("Jump value must not be zero")
+                    # Invalid jump value (not an integer)
+                    raise ValueError(f"Invalid jump value: '{jump_part}'")
+
             parsed = self.process_range(token)
             if parsed:
                 start, end = parsed
-                jump = abs(jump)
-                if start > end:
-                    numbers.extend(range(start, end - 1, -jump))
-                else:
-                    numbers.extend(range(start, end + 1, jump))
+                direction = 1 if start <= end else -1  # Determine direction
+                jump = abs(jump)  # Always use positive jump for range
+                # Generate range values, skipping duplicates
+                for value in range(start, end + direction, direction * jump):
+                    if value not in seen:
+                        numbers.append(value)
+                        seen.add(value)
             else:
-                if not token.isdigit():
-                    raise ValueError(f"Invalid number or unsupported range: '{token}'")
-                numbers.append(int(token))
+                try:
+                    # Try to parse as a standalone integer
+                    value = int(token)
+                    if value not in seen:
+                        numbers.append(value)
+                        seen.add(value)
+                except ValueError:
+                    raise ValueError(f"Invalid standalone value: '{token}'")
         return numbers
