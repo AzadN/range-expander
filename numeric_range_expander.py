@@ -105,3 +105,32 @@ class NumericRangeExpander:
             return set(numbers)
         else:
             raise ValueError(f"Unsupported output format: '{output_format}'")
+        
+if __name__ == "__main__":
+    """
+    Command-line interface for NumericRangeExpander.
+    Allows users to expand numeric ranges from the terminal with optional delimiters and output formats.
+
+    Usage:
+        python numeric_range_expander.py "1-5,7,10-2:2" --format csv --delims - .. to
+
+    Arguments:
+        input (str): Range string to expand (e.g. '1-5,7,10-2:2').
+        --format (str): Output format ('list', 'csv', 'set'). Default is 'list'.
+        --delims (list): Custom delimiters (e.g. --delims - .. to).
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Expand number ranges with optional steps and formats.")
+    parser.add_argument("input", help="Range string to expand (e.g. '1-5,7,10-2:2')")
+    parser.add_argument("--format", default="list", choices=["list", "csv", "set"], help="Output format")
+    parser.add_argument("--delims", nargs="*", default=None, help="Custom delimiters (e.g. --delims - .. to)")
+
+    args = parser.parse_args()
+
+    try:
+        expander = NumericRangeExpander(delimiters=args.delims)
+        result = expander.expand(args.input, output_format=args.format)
+        print(result)
+    except ValueError as ve:
+        print(f"[error] {ve}")

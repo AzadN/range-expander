@@ -45,16 +45,8 @@ from numeric_range_expander import NumericRangeExpander
 
 expander = NumericRangeExpander()
 result = expander.expand("1-5:2,10-2:4")
-print(result)  # Output: [1, 3, 5, 10, 6, 2]
-```
-
-### Duplicate handling
-Duplicate values are automatically removed from the output:
-```python
-expander = NumericRangeExpander()
-result = expander.expand("1-3,2,3")
 print(result)  
-# Output: [1, 2, 3]
+# Output: [1, 3, 5, 10, 6, 2]
 ```
 
 ### Output formats
@@ -71,6 +63,20 @@ result_set = expander.expand("1-3,5", output_format="set")
 print(result_set)  
 # Output: {1, 2, 3, 5}
 ```
+
+### CLI Usage
+
+You can also use NumericRangeExpander directly from the command line:
+
+```sh
+python numeric_range_expander.py "1-5,7,10-2:2" --format csv --delims - .. to
+# Output: 1,2,3,4,5,7,10,8,6,4,2
+```
+
+Arguments:
+- The first argument is the range string to expand (e.g., '1-5,7,10-2:2').
+- `--format` specifies the output format ('list', 'csv', 'set'). Default is 'list'.
+- `--delims` allows you to specify custom delimiters (e.g., `--delims - .. to`).
 
 ## Docstring Summary (Quick Command)
 
