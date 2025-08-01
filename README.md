@@ -11,6 +11,7 @@ The `NumericRangeExpander` class takes a string containing numbers and numeric r
 - Supports custom range delimiters (e.g., `..`, `to`, `~`)
 - Supports jump values for ranges (e.g., `1-5:2` → `[1, 3, 5]`)
 - Removes duplicate values from the output (e.g., `1-3,2,3` → `[1, 2, 3]`)
+- Supports multiple output formats: list, csv, set
 - Easy to use and extend
 
 
@@ -52,14 +53,44 @@ Duplicate values are automatically removed from the output:
 ```python
 expander = NumericRangeExpander()
 result = expander.expand("1-3,2,3")
-print(result)  # Output: [1, 2, 3]
+print(result)  
+# Output: [1, 2, 3]
 ```
 
-Notes:
-- The jump value must be a nonzero integer. If omitted, the default is 1.
-- Reversed ranges (e.g., `10-2:4`) are supported.
-- Duplicate values from overlapping ranges or repeated numbers are removed.
-- Invalid jump values (e.g., `1-5:a` or `1-5:0`) will raise a `ValueError`.
+### Output formats
+You can specify the output format using the `output_format` argument:
+```python
+expander = NumericRangeExpander()
+result_list = expander.expand("1-3,5")
+print(result_list)  
+# Output: [1, 2, 3, 5]
+result_csv = expander.expand("1-3,5", output_format="csv")
+print(result_csv)  
+# Output: "1,2,3,5"
+result_set = expander.expand("1-3,5", output_format="set")
+print(result_set)  
+# Output: {1, 2, 3, 5}
+```
+
+## Docstring Summary (Quick Command)
+
+To quickly view all docstrings for the main file or test file, use the built-in `pydoc` command:
+
+```sh
+python -m pydoc numeric_range_expander
+python -m pydoc test_numeric_range_expander
+```
+
+This will display the module, class, and function docstrings in your terminal for easy review.
+
+
+> **Note:**  
+> - Supported formats: "list" (default), "csv", "set".
+> - An unsupported format will raise a `ValueError`.
+> - The jump value must be a nonzero integer. If omitted, the default is 1.
+> - Reversed ranges (e.g., `10-2:4`) are supported.
+> - Duplicate values from overlapping ranges or repeated numbers are removed.
+> - Invalid jump values (e.g., `1-5:a` or `1-5:0`) will raise a `ValueError`.
 
 
 ## Installation

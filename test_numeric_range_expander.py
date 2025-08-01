@@ -5,7 +5,6 @@ Unit tests for the NumericRangeExpander class in numeric_range_expander.py.
 
 from numeric_range_expander import NumericRangeExpander
 
-
 def test_stage1_basic():
     """
     Test the expand method of NumericRangeExpander with basic input cases.
@@ -112,3 +111,18 @@ def test_stage6_dedup_overlap():
         s.expand("1-3,a")
     except ValueError as e:
         assert "Invalid standalone value" in str(e)
+
+def test_stage7_output_formats():
+    """
+    Test the expand method of NumericRangeExpander for different output formats.
+    Ensures that output_format argument works as expected.
+    """
+    r = NumericRangeExpander()
+    assert r.expand("1-3,2-5", output_format='list') == [1, 2, 3, 4, 5]
+    assert r.expand("1-3,2-5", output_format='csv') == "1,2,3,4,5"
+    assert r.expand("1-3,2-5", output_format='set') == {1, 2, 3, 4, 5}
+    # Unsupported format
+    try:
+        r.expand("1-3,5", output_format="dict")
+    except ValueError as e:
+        assert "Unsupported output format" in str(e)

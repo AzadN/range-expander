@@ -1,9 +1,9 @@
 class NumericRangeExpander:
     """
-    Expands numeric string ranges into a list of unique integers.
+    Expands numeric string ranges into a list, set, or CSV of unique integers.
     For example, '1-3,5' becomes [1, 2, 3, 5].
     Duplicate values are removed from the output.
-    Supports custom delimiters and jump values.
+    Supports custom delimiters, jump values, and multiple output formats.
     """
 
     def __init__(self, delimiters=None):
@@ -34,18 +34,23 @@ class NumericRangeExpander:
                         raise ValueError(f"Invalid range: '{token}'")
         # Return None if no delimiter matches
         return None
-    
-    def expand(self, input):
+
+    def expand(self, input, output_format="list"):
         """
-        Expands a string containing numbers and ranges into a list of unique integers.
-        Supports custom delimiters and jump values.
-        Duplicate values are removed from the output.
+        Expands a string containing numbers and ranges into a list, set, or CSV of unique integers.
+        Supports custom delimiters and jump values. Duplicate values are removed from the output.
 
         Args:
             input (str): A string containing numbers and ranges separated by commas (e.g., '1-3,5').
+            output_format (str): Output format: "list" (default), "csv", or "set".
 
         Returns:
-            numbers (list): A list of unique integers expanded from the input string.
+            list: If output_format is "list", returns a list of unique integers.
+            str: If output_format is "csv", returns a comma-separated string of unique integers.
+            set: If output_format is "set", returns a set of unique integers.
+
+        Raises:
+            ValueError: For invalid ranges, jump values, unsupported output formats, or non-integer tokens.
         """
         numbers = []
         seen = set()
@@ -90,4 +95,13 @@ class NumericRangeExpander:
                         seen.add(value)
                 except ValueError:
                     raise ValueError(f"Invalid standalone value: '{token}'")
-        return numbers
+        
+        # Handle output format
+        if output_format == "list":
+            return numbers
+        elif output_format == "csv":
+            return ','.join(str(x) for x in numbers)
+        elif output_format == "set":
+            return set(numbers)
+        else:
+            raise ValueError(f"Unsupported output format: '{output_format}'")
